@@ -34,6 +34,7 @@ add_library(ptxlite_core
   src/RegAlloc.cpp
   src/ObjectFile.cpp
   src/Compiler.cpp
+  src/Interpreter.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
 
@@ -47,6 +48,11 @@ target_link_libraries(ptxlite-objdump PRIVATE ptxlite_core)
 # ---- tests -----------------------------------------------------------------
 enable_testing()
 
+add_executable(ptxlite_tests tests/tests.cpp)
+target_link_libraries(ptxlite_tests PRIVATE ptxlite_core)
+target_compile_definitions(ptxlite_tests PRIVATE
+  PTXLITE_EXAMPLES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/examples")
+add_test(NAME unit_tests COMMAND ptxlite_tests)
 
 # Every example must compile and disassemble cleanly...
 foreach(example vec_add saxpy row_sum const_fold)
