@@ -25,5 +25,6 @@ endif()
 # ---- core library: everything except the command-line front ends ----------
 add_library(ptxlite_core
   src/IR.cpp
+  src/Lexer.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
