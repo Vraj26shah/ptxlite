@@ -29,5 +29,7 @@ add_library(ptxlite_core
   src/Parser.cpp
   src/Verifier.cpp
   src/CFG.cpp
+  src/ConstantFolding.cpp
+  src/DeadCodeElim.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
