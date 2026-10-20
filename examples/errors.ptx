@@ -1,0 +1,22 @@
+// Intentionally broken: ptxlite should report every problem with file:line:col.
+.version 7.8
+.target sm_80
+.address_size 64
+
+.visible .entry broken(
+    .param .u64 out
+)
+{
+    .reg .b32   %r<4>;
+    .reg .b64   %rd<3>;
+    .reg .f32   %f<2>;
+
+    ld.param.u64        %rd1, [out];
+    add.u64             %r1, %r2, %r3;      // 32-bit registers used with .u64
+    mul.s32             %r1, %r2, %r3;      // integer mul needs .lo/.hi/.wide
+    mov.f32             %f1, 1;             // integer literal for a float
+    mov.u32             %r1, %r9;           // %r9 was never declared
+    ld.global.u32       %r2, [%r3];         // address must be 64-bit
+    bra                 NOWHERE;            // no such label
+    ret;
+}

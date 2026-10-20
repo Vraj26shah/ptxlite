@@ -1,0 +1,47 @@
+// c[i] = a[i] + b[i]  for i < n
+// Close to what nvcc emits for:
+//   __global__ void vec_add(const float* a, const float* b, float* c, int n) {
+//       int i = blockIdx.x * blockDim.x + threadIdx.x;
+//       if (i < n) c[i] = a[i] + b[i];
+//   }
+.version 7.8
+.target sm_80
+.address_size 64
+
+.visible .entry vec_add(
+    .param .u64 a,
+    .param .u64 b,
+    .param .u64 c,
+    .param .u32 n
+)
+{
+    .reg .pred  %p<2>;
+    .reg .b32   %r<6>;
+    .reg .f32   %f<4>;
+    .reg .b64   %rd<11>;
+
+    ld.param.u64        %rd1, [a];
+    ld.param.u64        %rd2, [b];
+    ld.param.u64        %rd3, [c];
+    ld.param.u32        %r2, [n];
+    mov.u32             %r3, %ctaid.x;
+    mov.u32             %r4, %ntid.x;
+    mov.u32             %r5, %tid.x;
+    mad.lo.s32          %r1, %r3, %r4, %r5;     // global thread index
+    setp.ge.s32         %p1, %r1, %r2;          // out of range?
+    @%p1 bra            DONE;
+
+    cvta.to.global.u64  %rd4, %rd1;
+    cvta.to.global.u64  %rd5, %rd2;
+    cvta.to.global.u64  %rd6, %rd3;
+    mul.wide.s32        %rd7, %r1, 4;           // byte offset = i * sizeof(float)
+    add.s64             %rd8, %rd4, %rd7;
+    add.s64             %rd9, %rd5, %rd7;
+    add.s64             %rd10, %rd6, %rd7;
+    ld.global.f32       %f1, [%rd8];
+    ld.global.f32       %f2, [%rd9];
+    add.f32             %f3, %f1, %f2;
+    st.global.f32       [%rd10], %f3;
+DONE:
+    ret;
+}

@@ -32,5 +32,33 @@ add_library(ptxlite_core
   src/ConstantFolding.cpp
   src/DeadCodeElim.cpp
   src/RegAlloc.cpp
+  src/ObjectFile.cpp
+  src/Compiler.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
+
+# ---- tools -----------------------------------------------------------------
+add_executable(ptxlite tools/ptxlite.cpp)
+target_link_libraries(ptxlite PRIVATE ptxlite_core)
+
+add_executable(ptxlite-objdump tools/ptxlite-objdump.cpp)
+target_link_libraries(ptxlite-objdump PRIVATE ptxlite_core)
+
+# ---- tests -----------------------------------------------------------------
+enable_testing()
+
+
+# Every example must compile and disassemble cleanly...
+foreach(example vec_add saxpy row_sum const_fold)
+  add_test(NAME compile_${example}
+    COMMAND ptxlite ${CMAKE_CURRENT_SOURCE_DIR}/examples/${example}.ptx
+            -o ${CMAKE_CURRENT_BINARY_DIR}/${example}.pobj -v)
+  add_test(NAME objdump_${example}
+    COMMAND ptxlite-objdump ${CMAKE_CURRENT_BINARY_DIR}/${example}.pobj)
+  set_tests_properties(objdump_${example} PROPERTIES DEPENDS compile_${example})
+endforeach()
+
+# ...and the intentionally broken file must be rejected.
+add_test(NAME reject_errors
+  COMMAND ptxlite ${CMAKE_CURRENT_SOURCE_DIR}/examples/errors.ptx -o ${CMAKE_CURRENT_BINARY_DIR}/errors.pobj)
+set_tests_properties(reject_errors PROPERTIES WILL_FAIL TRUE)
