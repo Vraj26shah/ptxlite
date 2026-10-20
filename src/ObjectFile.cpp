@@ -326,7 +326,7 @@ std::string hexFloat(int64_t bits, bool asF32) {
 }
 
 std::string targetLabel(int64_t index) {
-    char buf[16];
+    char buf[32];
     std::snprintf(buf, sizeof buf, "L_%04lld", static_cast<long long>(index));
     return buf;
 }
@@ -402,7 +402,7 @@ std::string disassemble(const ObjModule& obj) {
                 text += (k ? ", " : " ") + formatObjOperand(fn, inst, inst.ops[k]);
             text += ';';
 
-            char addr[16];
+            char addr[32];
             std::snprintf(addr, sizeof addr, "/*%04zu*/", i);
             os << "  " << addr << "  " << text;
             if (text.size() < 44) os << std::string(44 - text.size(), ' ');
