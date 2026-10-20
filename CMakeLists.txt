@@ -31,5 +31,6 @@ add_library(ptxlite_core
   src/CFG.cpp
   src/ConstantFolding.cpp
   src/DeadCodeElim.cpp
+  src/RegAlloc.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
