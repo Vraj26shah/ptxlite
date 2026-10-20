@@ -27,5 +27,6 @@ add_library(ptxlite_core
   src/IR.cpp
   src/Lexer.cpp
   src/Parser.cpp
+  src/Verifier.cpp
 )
 target_include_directories(ptxlite_core PUBLIC src)
